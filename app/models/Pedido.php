@@ -3,7 +3,6 @@
 class Pedido
 {
     public $id;
-    public $nroOrden;
     public $idMesa;
     public $idMozo;
     public $nombreCliente;
@@ -14,10 +13,9 @@ class Pedido
     public function crearPedido()
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO pedidos (nroOrden, idMesa, nombreCliente, fechaAlta, pathFoto)
-                                                       VALUES (:nroOrden, :idMesa, :nombreCliente, :fechaAlta, :pathFoto)");
+        $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO pedidos (idMesa, nombreCliente, fechaAlta, pathFoto)
+                                                       VALUES (:idMesa, :nombreCliente, :fechaAlta, :pathFoto)");
 
-        $consulta->bindValue(':nroOrden', $this->nroOrden, PDO::PARAM_INT);
         $consulta->bindValue(':idMesa', $this->idMesa, PDO::PARAM_INT);
         $consulta->bindValue(':nombreCliente', $this->nombreCliente, PDO::PARAM_STR);
         $consulta->bindValue(':fechaAlta', date("Y-m-d H:i:s"));
@@ -55,25 +53,22 @@ class Pedido
 
         return $consulta->fetchAll(PDO::FETCH_CLASS, 'Pedido');
     }
-
-    public static function obtenerPedidosPorNroOrden($nroOrden)
+    
+    public static function actualizarPrecioTotal($id, $precioTotal)
     {
-        $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("SELECT * FROM pedidos
-                                                       WHERE nroOrden = :nroOrden");
-        $consulta->bindValue(':nroOrden', $nroOrden, PDO::PARAM_INT);
+        $objAccesoDato = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDato->prepararConsulta("UPDATE pedidos SET precioTotal = :precioTotal WHERE id = :id");
+        $consulta->bindValue(':id', $id, PDO::PARAM_INT);
+        $consulta->bindValue(':precioTotal', $precioTotal);
         $consulta->execute();
-
-        return $consulta->fetchAll(PDO::FETCH_CLASS, 'Pedido');
     }
 
     public static function borrarPedido($id)
     {
         $objAccesoDato = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDato->prepararConsulta("UPDATE pedido SET fechaBaja = :fechaBaja WHERE id = :id");
-        $fecha = new DateTime(date("d-m-Y"));
+        $consulta = $objAccesoDato->prepararConsulta("UPDATE pedidos SET fechaBaja = :fechaBaja WHERE id = :id");
         $consulta->bindValue(':id', $id, PDO::PARAM_INT);
-        $consulta->bindValue(':fechaBaja', date_format($fecha, 'Y-m-d H:i:s'));
+        $consulta->bindValue(':fechaBaja', date('Y-m-d H:i:s'));
         $consulta->execute();
     }
 }

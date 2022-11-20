@@ -11,31 +11,33 @@ class ProductoController extends Producto
         if(isset($parametros['nombre']) &&
         isset($parametros['sector']) &&
         isset($parametros['precio']) &&
-        isset($parametros['cantidad']) &&
         isset($parametros['nroOrden']))
         {
           $nombre = $parametros['nombre'];
           $sector = $parametros['sector'];
           $precio = $parametros['precio'];
-          $cantidad = $parametros['cantidad'];
           $nroOrden = $parametros['nroOrden'];
   
           $usr = new Producto();
           $usr->nombre = $nombre;
           $usr->sector = $sector;
           $usr->precio = $precio;
-          $usr->cantidad = $cantidad;
           $usr->nroOrden = $nroOrden;
           $usr->crearProducto();
   
-          $pedido=Pedido::obtenerPedidosPorNroOrden($nroOrden);
+          $pedido=Pedido::obtenerPedidoPorId($nroOrden);
+          $nuevoPrecio=0;
 
-          if($pedido!=NULL)
+          if($pedido==NULL)
           {
-            
+            $nuevoPrecio = Producto::obtenerPrecioTotalPorNroOrden($nroOrden);
+            var_dump($nuevoPrecio);
+            Pedido::actualizarPrecioTotal($nroOrden, $nuevoPrecio);
+
+            $payload = json_encode(array("mensaje" => "Producto creado con exito", "precioPedido"=> $nuevoPrecio));
           }
-          
-          $payload = json_encode(array("mensaje" => "Producto creado con exito"));
+          else
+            $payload = json_encode(array("error" => "Ese pedido no existe"));
         }
 
         $response->getBody()->write($payload);

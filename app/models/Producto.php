@@ -83,6 +83,16 @@ class Producto
         return $consulta->fetchAll(PDO::FETCH_CLASS, 'Producto');
     }
 
+    public static function obtenerPrecioTotalPorNroOrden($nroOrden)
+    {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT SUM(p.precio) precioTotal FROM productos p WHERE nroOrden = :nroOrden");
+        $consulta->bindValue(':nroOrden', $nroOrden, PDO::PARAM_INT);
+        $consulta->execute();
+
+        return $consulta->fetchObject()->precioTotal;
+    }
+
     public static function borrarProducto($id)
     {
         $objAccesoDato = AccesoDatos::obtenerInstancia();
