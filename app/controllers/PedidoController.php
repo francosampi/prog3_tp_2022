@@ -32,6 +32,8 @@ class PedidoController extends Pedido
             $pedido = new Pedido();
             $pedido->idMesa = $idMesa;
             $pedido->nombreCliente = $nombreCliente;
+            $pedido -> estado = "Pendiente";
+            $pedido -> fechaAlta = date("Y-m-d H:i:s");
   
             $foto = $files["img"];
             $fotoCarpeta = './media/pedidos/';
@@ -111,6 +113,8 @@ class PedidoController extends Pedido
         $nroOrden = $args['nroOrden'];
 
         $pedido = Pedido::obtenerTiempoEstimadoPedido($codigoMesa, $nroOrden);
+
+        /*
         $horaEstimada = new DateTime($pedido->horaEstimada);
         $ahora = new DateTime();
 
@@ -123,9 +127,10 @@ class PedidoController extends Pedido
         $min = $tiempoRestante->days * 24 * 60;
         $min += $tiempoRestante->h * 60;
         $min += $tiempoRestante->i;
+        */
 
         if ($pedido!=NULL)
-          $payload = json_encode(array("tiempoRestante" => $min. " minutos"));
+          $payload = json_encode(array("pedido" => $pedido));
         else
           $payload = json_encode(array("mensaje" => "Pedidos no encontrados..."));
       }
@@ -137,7 +142,7 @@ class PedidoController extends Pedido
 
     public function TraerTodosConTiempoEstimado($request, $response, $args)
     {
-      $payload = json_encode(array("error" => "Faltan datos..."));
+      $payload = json_encode(array("error" => "Ocurrio un error..."));
 
       $lista = Pedido::obtenerPedidosConTiempoEstimado();
 
@@ -149,6 +154,61 @@ class PedidoController extends Pedido
       $response->getBody()->write($payload);
       return $response
         ->withHeader('Content-Type', 'application/json');
+    }
+
+    public function TraerTodosListos($request, $response, $args)
+    {
+      $payload = json_encode(array("error" => "Ocurrio un error..."));
+
+      $lista = Pedido::obtenerPedidosListos();
+
+      if ($lista!=NULL)
+        $payload = json_encode(array("pedidos" => $lista));
+      else
+        $payload = json_encode(array("mensaje" => "No hay pedidos listos por el momento..."));
+
+      $response->getBody()->write($payload);
+      return $response
+        ->withHeader('Content-Type', 'application/json');
+    }
+
+    public function ServirUno($request, $response, $args)
+    {
+        $parametros = $request->getParsedBody();
+        $payload = json_encode(array("error" => "Faltan datos..."));
+
+        if(isset($parametros['id']))
+        {
+          $id = $parametros['id'];
+          $pedido=Pedido::obtenerPedidoPorId($id);
+
+          if ($pedido!=NULL)
+          {
+            if($pedido->estado == "Listo para servir")
+            {
+              
+              $mesa = Mesa::obtenerMesaPorId($pedido->idMesa);
+              if ($mesa->estado=="Con cliente esperando el pedido")
+              {
+                $pedido->estado = "Servido";
+                Pedido::actualizarPedido($pedido);
+
+                $mesa->estado = "Con clientes comiendo";
+                Mesa::actualizarMesa($mesa);
+
+                $payload = json_encode(array("mensaje" => "Pedido servido con exito"));
+              }
+            }
+            else
+              $payload = json_encode(array("mensaje" => "Este pedido sigue en preparación..."));
+          }
+          else
+            $payload = json_encode(array("mensaje" => "Este pedido no existe..."));
+        }
+
+        $response->getBody()->write($payload);
+        return $response
+          ->withHeader('Content-Type', 'application/json');
     }
 
     public function BorrarUno($request, $response, $args)

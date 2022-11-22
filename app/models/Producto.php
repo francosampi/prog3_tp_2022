@@ -48,11 +48,21 @@ class Producto
 
         return $consulta->fetchObject('Producto');
     }
-
+    
     public static function obtenerProductosPorNroOrden($nroOrden)
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
         $consulta = $objAccesoDatos->prepararConsulta("SELECT * FROM productos WHERE nroOrden = :nroOrden");
+        $consulta->bindValue(':nroOrden', $nroOrden, PDO::PARAM_INT);
+        $consulta->execute();
+
+        return $consulta->fetchAll(PDO::FETCH_CLASS, 'Producto');
+    }
+
+    public static function obtenerProductosFinalizadosPorNroOrden($nroOrden)
+    {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT * FROM productos WHERE nroOrden = :nroOrden AND estado = 'Listo para servir'");
         $consulta->bindValue(':nroOrden', $nroOrden, PDO::PARAM_INT);
         $consulta->execute();
 
@@ -99,7 +109,7 @@ class Producto
     public static function borrarProducto($id)
     {
         $objAccesoDato = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDato->prepararConsulta("DELETE FROM `productos` WHERE id = :id");
+        $consulta = $objAccesoDato->prepararConsulta("DELETE FROM productos WHERE id = :id");
         $consulta->bindValue(':id', $id, PDO::PARAM_INT);
         $consulta->execute();
     }

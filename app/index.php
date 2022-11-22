@@ -44,18 +44,19 @@ $app->group('/empleado', function (RouteCollectorProxy $group){
     $group->delete('[/]', \EmpleadoController::class . ':BorrarUno');
 })->add(new MWAutenticadorSocio());
 
-//RUTAS: pedidos
+//RUTAS: pedidos (Mozo)
 $app->group('/pedido', function (RouteCollectorProxy $group){
-    $group->post('[/]', \PedidoController::class . ':CargarUno')
-        ->add(new MWAutenticadorMozo());
-    $group->get('/{codigoMesa}/{nroOrden}', \PedidoController::class . ':TraerUnoConTiempoEstimado');
-});
+    $group->post('[/]', \PedidoController::class . ':CargarUno');
+    $group->get('/listo', \PedidoController::class . ':TraerTodosListos');
+    $group->put('/servir', \PedidoController::class . ':ServirUno');
+})->add(new MWAutenticadorMozo());
 
 //RUTAS: pedidos (Socio)
 $app->group('/pedido', function (RouteCollectorProxy $group){
     $group->get('[/]', \PedidoController::class . ':TraerTodos');
     $group->get('/id/{pedido}', \PedidoController::class . ':TraerUno');
     $group->get('/tiempo', \PedidoController::class . ':TraerTodosConTiempoEstimado');
+    $group->delete('[/]', \PedidoController::class . ':BorrarUno');
 })->add(new MWAutenticadorSocio());
 
 //RUTAS: productos (Socio)
@@ -96,6 +97,11 @@ $app->group('/mesa', function (RouteCollectorProxy $group){
     $group->put('/cerrar', \MesaController::class . ':CerrarUna');
     $group->delete('[/]', \MesaController::class . ':BorrarUna');
 })->add(new MWAutenticadorSocio());
+
+//RUTAS: Cliente
+$app->group('/cliente', function (RouteCollectorProxy $group){
+    $group->get('/{codigoMesa}/{nroOrden}', \PedidoController::class . ':TraerUnoConTiempoEstimado');
+});
 
 //RUTA: Login cuenta
 $app->post('/login', \AutentificadorController::class . ':LoginCuenta');

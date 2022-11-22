@@ -30,7 +30,9 @@ class ProductoController extends Producto
           if($pedido!=NULL)
           {
             $nuevoPrecio = Producto::obtenerPrecioTotalPorNroOrden($nroOrden);
-            Pedido::actualizarPrecioTotal($nroOrden, $nuevoPrecio);
+            $pedido->precioTotal=$nuevoPrecio;
+
+            Pedido::actualizarPedido($pedido);
 
             $payload = json_encode(array("mensaje" => "Producto creado con exito", "precioPedido"=> $nuevoPrecio));
           }
@@ -194,7 +196,7 @@ class ProductoController extends Producto
 
         $idEmpleado = $empleado->id;
         $empleadoNombre = $empleado->nombre;
-        $horaFinalizacion = date("Y-m-d h:i:s");
+        $horaFinalizacion = date("Y-m-d H:i:s");
         
         if($producto!=NULL)
         {
@@ -204,8 +206,20 @@ class ProductoController extends Producto
             {
               $producto->estado = "Listo para servir";
               $producto->horaFinalizacion = $horaFinalizacion;
+              $nroOrden=$producto->nroOrden;
 
               Producto::actualizarProducto($producto);
+
+              //comparo los productos del numero de orden con los productos finalizados del numero de orden
+              $productosOrden=Producto::obtenerProductosPorNroOrden($nroOrden);
+              $productosOrdenFinalizados=Producto::obtenerProductosFinalizadosPorNroOrden($nroOrden);
+
+              if(count($productosOrden)==count($productosOrdenFinalizados))
+              {
+                $pedido=Pedido::obtenerPedidoPorId($nroOrden);
+                $pedido->estado = "Listo para servir";
+                Pedido::actualizarPedido($pedido);
+              }
 
               $payload = json_encode(array("mensaje" => "Producto actualizado...", "horaFinalizacion" => $horaFinalizacion, "empleado" => $empleadoNombre));
             }
