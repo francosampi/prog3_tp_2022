@@ -26,12 +26,10 @@ class ProductoController extends Producto
           $usr->crearProducto();
   
           $pedido=Pedido::obtenerPedidoPorId($nroOrden);
-          $nuevoPrecio=0;
 
-          if($pedido==NULL)
+          if($pedido!=NULL)
           {
             $nuevoPrecio = Producto::obtenerPrecioTotalPorNroOrden($nroOrden);
-            var_dump($nuevoPrecio);
             Pedido::actualizarPrecioTotal($nroOrden, $nuevoPrecio);
 
             $payload = json_encode(array("mensaje" => "Producto creado con exito", "precioPedido"=> $nuevoPrecio));
@@ -152,14 +150,14 @@ class ProductoController extends Producto
             $horaEstimada = $horaEstimada->format("Y-m-d H:i:s");
 
             if($empleadoPerfil=="cocinero" && ($producto->sector=="cocina" || $producto->sector=="candybar") ||
-               $empleadoPerfil=="bartender" && $producto->sector=="barra" ||
-               $empleadoPerfil=="cervecero" && $producto->sector=="cerveza artesanal")
-              {
-                Producto::actualizarEstadoPreparacion($idProducto, $idEmpleado, $horaEstimada);
-                $payload = json_encode(array("mensaje" => "Producto actualizado...", "horaEstimada" => $horaEstimada, "empleado" => $empleadoNombre));
-              }
-              else
-               $payload = json_encode(array("error" => "El producto pertenece a otro sector..."));
+              $empleadoPerfil=="bartender" && $producto->sector=="barra" ||
+              $empleadoPerfil=="cervecero" && $producto->sector=="cerveza artesanal")
+            {
+              Producto::actualizarEstadoPreparacion($idProducto, $idEmpleado, $horaEstimada);
+              $payload = json_encode(array("mensaje" => "Producto actualizado...", "horaEstimada" => $horaEstimada, "empleado" => $empleadoNombre));
+            }
+            else
+              $payload = json_encode(array("error" => "El producto pertenece al sector '".$producto->sector."'..."));
           }
           else
             $payload = json_encode(array("error" => "Este producto ya se encuentra en preparacion..."));

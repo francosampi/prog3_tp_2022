@@ -44,14 +44,55 @@ class Pedido
         return $consulta->fetchObject('Pedido');
     }
 
+    public static function obtenerPedidoPorCodigoMesa($codigoMesa)
+    {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT * FROM pedidos WHERE id = :id");
+        $consulta->bindValue(':codigoMesa', $codigoMesa, PDO::PARAM_STR);
+        $consulta->execute();
+
+        return $consulta->fetchObject('Pedido');
+    }
+
     public static function obtenerPedidosSinMozo()
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("SELECT * FROM pedidos
-                                                       WHERE idMozo = NULL");
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT * FROM pedidos WHERE idMozo = NULL");
         $consulta->execute();
 
         return $consulta->fetchAll(PDO::FETCH_CLASS, 'Pedido');
+    }
+
+    public static function obtenerTiempoEstimadoPedido($codigoMesa, $nroOrden)
+    {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT p.nombreCliente, p.fechaAlta,
+                                                       MAX(pr.horaEstimada) horaEstimada
+                                                       FROM productos pr
+                                                       JOIN pedidos p
+                                                       ON pr.nroOrden = :nroOrden
+                                                       JOIN mesas m
+                                                       ON p.idMesa = m.id
+                                                       WHERE m.codigo = :codigoMesa");
+        $consulta->bindValue(':nroOrden', $nroOrden, PDO::PARAM_INT);
+        $consulta->bindValue(':codigoMesa', $codigoMesa, PDO::PARAM_STR);
+        $consulta->execute();
+
+        return $consulta->fetchObject('stdClass');
+    }
+
+    public static function obtenerPedidosConTiempoEstimado()
+    {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT p.id, p.idMesa, p.idMozo, p.nombreCliente, p.fechaAlta, p.precioTotal, p.pathFoto,
+                                                       MAX(pr.horaEstimada) horaEstimada
+                                                       FROM productos pr
+                                                       JOIN pedidos p
+                                                       ON pr.nroOrden = p.id
+                                                       GROUP BY p.id");
+        $consulta->execute();
+
+        return $consulta->fetchAll(PDO::FETCH_CLASS, 'stdClass');
     }
     
     public static function actualizarPrecioTotal($id, $precioTotal)

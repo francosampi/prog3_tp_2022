@@ -58,17 +58,21 @@ class MesaController extends Mesa
     public function AbrirUna($request, $response, $args)
     {
         $parametros = $request->getParsedBody();
+        $header = $request->getHeaderLine("Authorization");
         $payload = json_encode(array("error" => "Faltan datos..."));
 
         if(isset($parametros['id']))
         {
-          $id = $parametros['id'];
+          $token = trim(explode("Bearer", $header)[1]);
+          $datos = AutentificadorJWT::ObtenerData($token);
+          $idEmpleado = Empleado::obtenerEmpleado($datos->usuario)->id;
 
+          $id = $parametros['id'];
           $mesa=Mesa::obtenerMesaPorId($id);
 
           if($mesa->estado == "Cerrada")
           {
-            Mesa::cambiarEstadoMesa($id, "Con cliente esperando pedido");
+            Mesa::cambiarEstadoMesa($id, $idEmpleado, "Con cliente esperando pedido");
             $payload = json_encode(array("mensaje" => "Mesa abierta con exito"));
           }
           else
@@ -93,7 +97,7 @@ class MesaController extends Mesa
 
           if($mesa->estado == "Con cliente pagando")
           {
-            Mesa::cambiarEstadoMesa($id, "Cerrada");
+            Mesa::cambiarEstadoMesa($id, NULL, "Cerrada");
             $payload = json_encode(array("mensaje" => "Mesa cerrada con exito"));
           }
           else

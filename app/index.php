@@ -46,10 +46,17 @@ $app->group('/empleado', function (RouteCollectorProxy $group){
 
 //RUTAS: pedidos
 $app->group('/pedido', function (RouteCollectorProxy $group){
-    $group->get('[/]', \PedidoController::class . ':TraerTodos');
-    $group->get('/{pedido}', \PedidoController::class . ':TraerUno');
-    $group->post('[/]', \PedidoController::class . ':CargarUno');
+    $group->post('[/]', \PedidoController::class . ':CargarUno')
+        ->add(new MWAutenticadorMozo());
+    $group->get('/{codigoMesa}/{nroOrden}', \PedidoController::class . ':TraerUnoConTiempoEstimado');
 });
+
+//RUTAS: pedidos (Socio)
+$app->group('/pedido', function (RouteCollectorProxy $group){
+    $group->get('[/]', \PedidoController::class . ':TraerTodos');
+    $group->get('/id/{pedido}', \PedidoController::class . ':TraerUno');
+    $group->get('/tiempo', \PedidoController::class . ':TraerTodosConTiempoEstimado');
+})->add(new MWAutenticadorSocio());
 
 //RUTAS: productos (Socio)
 $app->group('/producto', function (RouteCollectorProxy $group){
