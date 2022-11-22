@@ -69,20 +69,6 @@ class Producto
         return $consulta->fetchAll(PDO::FETCH_CLASS, 'Producto');
     }
 
-    public static function actualizarEstadoPreparacion($id, $idEmpleado, $horaEstimada)
-    {
-        $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("UPDATE productos
-                                                       SET idEmpleado = :idEmpleado, horaEstimada = :horaEstimada, estado = :estado WHERE id = :id");
-        $consulta->bindValue(':idEmpleado', $idEmpleado, PDO::PARAM_INT);
-        $consulta->bindValue(':horaEstimada', $horaEstimada, PDO::PARAM_STR);
-        $consulta->bindValue(':estado', "En preparacion", PDO::PARAM_STR);
-        $consulta->bindValue(':id', $id, PDO::PARAM_STR);
-        $consulta->execute();
-
-        return $consulta->fetchAll(PDO::FETCH_CLASS, 'Producto');
-    }
-
     public static function obtenerPrecioTotalPorNroOrden($nroOrden)
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
@@ -91,6 +77,23 @@ class Producto
         $consulta->execute();
 
         return $consulta->fetchObject()->precioTotal;
+    }
+
+    public static function actualizarProducto($producto)
+    {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("UPDATE productos
+        SET estado = :estado, idEmpleado = :idEmpleado, horaInicio = :horaInicio, horaEstimada = :horaEstimada, horaFinalizacion = :horaFinalizacion
+        WHERE id = :id");
+        $consulta->bindValue(':estado', $producto->estado, PDO::PARAM_STR);
+        $consulta->bindValue(':idEmpleado', $producto->idEmpleado, PDO::PARAM_INT);
+        $consulta->bindValue(':horaInicio', $producto->horaInicio, PDO::PARAM_STR);
+        $consulta->bindValue(':horaEstimada', $producto->horaEstimada, PDO::PARAM_STR);
+        $consulta->bindValue(':horaFinalizacion', $producto->horaFinalizacion, PDO::PARAM_STR);
+        $consulta->bindValue(':id', $producto->id, PDO::PARAM_INT);
+        $consulta->execute();
+
+        return $consulta->fetchAll(PDO::FETCH_CLASS, 'Producto');
     }
 
     public static function borrarProducto($id)

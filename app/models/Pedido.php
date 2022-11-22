@@ -54,15 +54,6 @@ class Pedido
         return $consulta->fetchObject('Pedido');
     }
 
-    public static function obtenerPedidosSinMozo()
-    {
-        $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("SELECT * FROM pedidos WHERE idMozo = NULL");
-        $consulta->execute();
-
-        return $consulta->fetchAll(PDO::FETCH_CLASS, 'Pedido');
-    }
-
     public static function obtenerTiempoEstimadoPedido($codigoMesa, $nroOrden)
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();

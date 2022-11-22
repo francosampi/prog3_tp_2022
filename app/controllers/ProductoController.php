@@ -133,14 +133,14 @@ class ProductoController extends Producto
 
         $token = trim(explode("Bearer", $header)[1]);
         $datos = AutentificadorJWT::ObtenerData($token);
-
         $empleado = Empleado::obtenerEmpleado($datos->usuario);
-        $producto=Producto::obtenerProductoPorId($idProducto);
 
         $idEmpleado = $empleado->id;
         $empleadoNombre = $empleado->nombre;
         $empleadoPerfil = $empleado->perfil;
         
+        $producto=Producto::obtenerProductoPorId($idProducto);
+
         if($producto!=NULL)
         {
           if($producto->idEmpleado==NULL)
@@ -153,7 +153,12 @@ class ProductoController extends Producto
               $empleadoPerfil=="bartender" && $producto->sector=="barra" ||
               $empleadoPerfil=="cervecero" && $producto->sector=="cerveza artesanal")
             {
-              Producto::actualizarEstadoPreparacion($idProducto, $idEmpleado, $horaEstimada);
+              $producto->estado="En preparacion";
+              $producto->idEmpleado=$idEmpleado;
+              $producto->horaEstimada=$horaEstimada;
+
+              Producto::actualizarProducto($producto);
+
               $payload = json_encode(array("mensaje" => "Producto actualizado...", "horaEstimada" => $horaEstimada, "empleado" => $empleadoNombre));
             }
             else
@@ -161,6 +166,54 @@ class ProductoController extends Producto
           }
           else
             $payload = json_encode(array("error" => "Este producto ya se encuentra en preparacion..."));
+        }
+        else
+          $payload = json_encode(array("error" => "Ese producto no existe..."));
+        }
+
+      $response->getBody()->write($payload);
+      return $response
+        ->withHeader('Content-Type', 'application/json');
+    }
+
+    public function FinalizarProducto($request, $response, $args)
+    {
+      $parametros = $request->getParsedBody();
+      $header = $request->getHeaderLine("Authorization");
+      $payload = json_encode(array("error" => "Faltan datos..."));
+
+      if(isset($parametros['idProducto']))
+      {
+        $idProducto = $parametros['idProducto'];
+
+        $token = trim(explode("Bearer", $header)[1]);
+        $datos = AutentificadorJWT::ObtenerData($token);
+
+        $empleado = Empleado::obtenerEmpleado($datos->usuario);
+        $producto=Producto::obtenerProductoPorId($idProducto);
+
+        $idEmpleado = $empleado->id;
+        $empleadoNombre = $empleado->nombre;
+        $horaFinalizacion = date("Y-m-d h:i:s");
+        
+        if($producto!=NULL)
+        {
+          if($producto->estado=="En preparacion")
+          {
+            if($producto->idEmpleado==$idEmpleado)
+            {
+              $producto->estado = "Listo para servir";
+              $producto->horaFinalizacion = $horaFinalizacion;
+
+              Producto::actualizarProducto($producto);
+
+              $payload = json_encode(array("mensaje" => "Producto actualizado...", "horaFinalizacion" => $horaFinalizacion, "empleado" => $empleadoNombre));
+            }
+            else
+              $payload = json_encode(array("error" => "Este producto está siendo preparado por otro empleado..."));
+          }
+          else
+            $payload = json_encode(array("error" => "Este producto no se encuentra en preparacion"));
         }
         else
           $payload = json_encode(array("error" => "Ese producto no existe..."));

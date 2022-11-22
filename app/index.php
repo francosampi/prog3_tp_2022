@@ -69,10 +69,11 @@ $app->group('/producto', function (RouteCollectorProxy $group){
     $group->get('/sector/cocina', \ProductoController::class . ':TraerPorSectorCocina')->add(new MWAutenticadorCocinero());
     $group->get('/sector/barra', \ProductoController::class . ':TraerPorSectorBarra')->add(new MWAutenticadorBartender());
     $group->get('/sector/cerveza', \ProductoController::class . ':TraerPorSectorCerveza')->add(new MWAutenticadorCervecero());
-})->add(new MWAutenticadorEmpleado());
+});
 
 $app->group('/producto', function (RouteCollectorProxy $group){
     $group->put('/preparar', \ProductoController::class . ':PrepararProducto');
+    $group->put('/finalizar', \ProductoController::class . ':FinalizarProducto');
 })->add(new MWAutenticadorEmpleado());
 
 //RUTAS: productos (Mozo)
@@ -83,17 +84,18 @@ $app->group('/producto', function (RouteCollectorProxy $group){
 })->add(new MWAutenticadorMozo());
 
 //RUTAS: mesas (Mozo)
-$app->group('/mesas', function (RouteCollectorProxy $group){
+$app->group('/mesa', function (RouteCollectorProxy $group){
+    $group->get('/disponible', \MesaController::class . ':TraerUnaDisponible');
     $group->put('/abrir', \MesaController::class . ':AbrirUna');
 })->add(new MWAutenticadorMozo());
 
 //RUTAS: mesas (Socio)
-$app->group('/mesas', function (RouteCollectorProxy $group){
+$app->group('/mesa', function (RouteCollectorProxy $group){
     $group->get('[/]', \MesaController::class . ':TraerTodas');
-    $group->post('[/]', \MesaController::class . ':CargarUno');
+    $group->post('[/]', \MesaController::class . ':CargarUna');
     $group->put('/cerrar', \MesaController::class . ':CerrarUna');
-    $group->delete('[/]', \MesaController::class . ':BorrarUno');
-});
+    $group->delete('[/]', \MesaController::class . ':BorrarUna');
+})->add(new MWAutenticadorSocio());
 
 //RUTA: Login cuenta
 $app->post('/login', \AutentificadorController::class . ':LoginCuenta');
