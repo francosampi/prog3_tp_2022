@@ -17,6 +17,7 @@ require_once './db/AccesoDatos.php';
 require_once './controllers/AutentificadorController.php';
 require_once './controllers/EmpleadoController.php';
 require_once './controllers/PedidoController.php';
+require_once './controllers/PlatoController.php';
 require_once './controllers/ProductoController.php';
 require_once './controllers/MesaController.php';
 
@@ -42,6 +43,15 @@ $app->group('/empleado', function (RouteCollectorProxy $group){
     $group->post('[/]', \EmpleadoController::class . ':CargarUno');
     $group->put('[/]', \EmpleadoController::class . ':ModificarUno');
     $group->delete('[/]', \EmpleadoController::class . ':BorrarUno');
+})->add(new MWAutenticadorSocio());
+
+//RUTAS: ABM Platos (Socio)
+$app->group('/plato', function (RouteCollectorProxy $group){
+    $group->get('[/]', \PlatoController::class . ':TraerTodos');
+    $group->get('/{plato}', \PlatoController::class . ':TraerUno');
+    $group->post('[/]', \PlatoController::class . ':CargarUno');
+    $group->put('[/]', \PlatoController::class . ':ModificarUno');
+    $group->delete('[/]', \PlatoController::class . ':BorrarUno');
 })->add(new MWAutenticadorSocio());
 
 //RUTAS: pedidos (Mozo)
@@ -77,9 +87,13 @@ $app->group('/producto', function (RouteCollectorProxy $group){
     $group->put('/finalizar', \ProductoController::class . ':FinalizarProducto');
 })->add(new MWAutenticadorEmpleado());
 
-//RUTAS: productos (Mozo)
+//RUTAS: productos (Cliente)
 $app->group('/producto', function (RouteCollectorProxy $group){
     $group->post('[/]', \ProductoController::class . ':CargarUno');
+});
+
+//RUTAS: productos (Mozo)
+$app->group('/producto', function (RouteCollectorProxy $group){
     $group->put('[/]', \ProductoController::class . ':ModificarUno');
     $group->delete('[/]', \ProductoController::class . ':BorrarUno');
 })->add(new MWAutenticadorMozo());

@@ -8,36 +8,50 @@ class ProductoController extends Producto
         $parametros = $request->getParsedBody();
         $payload = json_encode(array("error" => "Faltan datos..."));
 
-        if(isset($parametros['nombre']) &&
-        isset($parametros['sector']) &&
-        isset($parametros['precio']) &&
+        if(isset($parametros['idPlato']) &&
         isset($parametros['nroOrden']))
         {
-          $nombre = $parametros['nombre'];
-          $sector = $parametros['sector'];
-          $precio = $parametros['precio'];
-          $nroOrden = $parametros['nroOrden'];
-  
-          $usr = new Producto();
-          $usr->nombre = $nombre;
-          $usr->sector = $sector;
-          $usr->precio = $precio;
-          $usr->nroOrden = $nroOrden;
-          $usr->crearProducto();
-  
-          $pedido=Pedido::obtenerPedidoPorId($nroOrden);
+          $idPlato = $parametros['idPlato'];
+          $plato = Plato::obtenerPlato($idPlato);
 
-          if($pedido!=NULL)
+          if($plato!=NULL)
           {
-            $nuevoPrecio = Producto::obtenerPrecioTotalPorNroOrden($nroOrden);
-            $pedido->precioTotal=$nuevoPrecio;
-
-            Pedido::actualizarPedido($pedido);
-
-            $payload = json_encode(array("mensaje" => "Producto creado con exito", "precioPedido"=> $nuevoPrecio));
+            if($plato->stock>0)
+            {
+              $nombre = $plato->nombre;
+              $sector = $plato->sector;
+              $precio = $plato->precio;
+              $nroOrden = $parametros['nroOrden'];
+  
+              $producto = new Producto();
+              $producto->nombre = $nombre;
+              $producto->sector = $sector;
+              $producto->precio = $precio;
+              $producto->nroOrden = $nroOrden;
+              $producto->crearProducto();
+              
+              $plato->stock--;
+              Plato::actualizarPlato($plato);
+      
+              $pedido=Pedido::obtenerPedidoPorId($nroOrden);
+    
+              if($pedido!=NULL)
+              {
+                $nuevoPrecio = Producto::obtenerPrecioTotalPorNroOrden($nroOrden);
+                $pedido->precioTotal=$nuevoPrecio;
+    
+                Pedido::actualizarPedido($pedido);
+    
+                $payload = json_encode(array("mensaje" => "Producto creado con exito", "precioPedido"=> $nuevoPrecio));
+              }
+              else
+                $payload = json_encode(array("error" => "Ese pedido no existe"));
+            }
+            else
+              $payload = json_encode(array("error" => "No hay stock de ese plato..."));
           }
           else
-            $payload = json_encode(array("error" => "Ese pedido no existe"));
+            $payload = json_encode(array("error" => "Ese plato no existe"));
         }
 
         $response->getBody()->write($payload);
@@ -58,7 +72,7 @@ class ProductoController extends Producto
     public function TraerPorSectorCocina($request, $response, $args)
     {
       $payload = json_encode(array("error" => "Faltan datos..."));
-      $lista = Producto::obtenerProductosPorSector("cocina");
+      $lista = Producto::obtenerProductosPendientesPorSector("cocina");
 
       if ($lista!=NULL)
         $payload = json_encode(array("productos" => $lista));
@@ -74,7 +88,7 @@ class ProductoController extends Producto
     {
       $payload = json_encode(array("error" => "Faltan datos..."));
 
-      $lista = Producto::obtenerProductosPorSector("barra");
+      $lista = Producto::obtenerProductosPendientesPorSector("barra");
 
       if ($lista!=NULL)
         $payload = json_encode(array("productos" => $lista));
@@ -90,7 +104,7 @@ class ProductoController extends Producto
     {
       $payload = json_encode(array("error" => "Faltan datos..."));
 
-      $lista = Producto::obtenerProductosPorSector("cerveza artesanal");
+      $lista = Producto::obtenerProductosPendientesPorSector("cerveza artesanal");
 
       if ($lista!=NULL)
         $payload = json_encode(array("productos" => $lista));
@@ -109,7 +123,7 @@ class ProductoController extends Producto
       if (isset($args['nroOrden']))
       {
         $nroOrden = $args['nroOrden'];
-        $lista = Producto::obtenerProductosPorNroOrden($nroOrden);
+        $lista = Producto::obtenerProductosPendientesPorSector($nroOrden);
 
         if ($lista!=NULL)
           $payload = json_encode(array("productos" => $lista));

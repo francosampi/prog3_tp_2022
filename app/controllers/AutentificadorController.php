@@ -15,7 +15,7 @@ class AutentificadorController
                 if($empleado==null)
                     throw new Exception("El empleado no existe...");
 
-                if (password_verify($params["clave"], $empleado->clave))
+                if (password_verify($params["clave"], $empleado->clave) && $empleado->estado=='activo')
                 {
                     $datos=array("nombre"=>$empleado->nombre, "usuario"=>$params["usuario"], "perfil"=>$empleado->perfil);
                     $token=AutentificadorJWT::CrearToken($datos);

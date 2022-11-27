@@ -32,7 +32,7 @@ class Empleado
     public static function obtenerTodos()
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("SELECT id, nombre, perfil, usuario, clave, fechaAlta, fechaBaja FROM empleados");
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT * FROM empleados");
         $consulta->execute();
 
         return $consulta->fetchAll(PDO::FETCH_CLASS, 'Empleado');
@@ -41,7 +41,7 @@ class Empleado
     public static function obtenerEmpleado($usuario)
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("SELECT id, nombre, perfil, usuario, clave, fechaAlta, fechaBaja FROM empleados WHERE usuario = :usuario");
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT * FROM empleados WHERE usuario = :usuario");
         $consulta->bindValue(':usuario', $usuario, PDO::PARAM_STR);
         $consulta->execute();
 

@@ -5,9 +5,9 @@ class Producto
     public $id;
     public $nroOrden;
     public $nombre;
-    public $sector;
+    public $sector; //cocina/barra/cerveza artesanal
     public $precio;
-    public $estado; //pendiente/en preparacion/listo para servir/entregado
+    public $estado; //pendiente/en preparacion/listo para servir/servido
     public $idEmpleado;
     public $horaInicio;
     public $horaEstimada;
@@ -69,10 +69,10 @@ class Producto
         return $consulta->fetchAll(PDO::FETCH_CLASS, 'Producto');
     }
 
-    public static function obtenerProductosPorSector($sector)
+    public static function obtenerProductosPendientesPorSector($sector)
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("SELECT * FROM productos WHERE sector = :sector");
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT * FROM productos WHERE sector = :sector AND estado = 'Pendiente'");
         $consulta->bindValue(':sector', $sector, PDO::PARAM_STR);
         $consulta->execute();
 
@@ -101,6 +101,16 @@ class Producto
         $consulta->bindValue(':horaEstimada', $producto->horaEstimada, PDO::PARAM_STR);
         $consulta->bindValue(':horaFinalizacion', $producto->horaFinalizacion, PDO::PARAM_STR);
         $consulta->bindValue(':id', $producto->id, PDO::PARAM_INT);
+        $consulta->execute();
+
+        return $consulta->fetchAll(PDO::FETCH_CLASS, 'Producto');
+    }
+
+    public static function actualizarProductosAServidos($nroOrden)
+    {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("UPDATE productos SET estado = 'Servido' WHERE nroOrden = :nroOrden");
+        $consulta->bindValue(':nroOrden', $nroOrden, PDO::PARAM_INT);
         $consulta->execute();
 
         return $consulta->fetchAll(PDO::FETCH_CLASS, 'Producto');

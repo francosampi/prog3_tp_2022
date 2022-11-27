@@ -50,13 +50,15 @@ class PedidoController extends Pedido
             $pedido->crearPedido();
             
             $mesa->idEmpleado = $idEmpleado;
-            $mesa->estado="Con cliente esperando el pedido";
+            $mesa->estado="Con clientes esperando el pedido";
             Mesa::actualizarMesa($mesa);
   
             $payload = json_encode(array("mensaje" => "Pedido creado con exito",
                                          "infoImagen" => "La imagen se ha guardado correctamente en ".$fotoDir,
                                          "codigoMesa" => $mesa->codigo));
           }
+          else
+            $payload = json_encode(array("error" => "Hay clientes ocupando esa mesa..."));
         }
         else
           $payload = json_encode(array("error" => "Esa mesa no existe..."));
@@ -186,12 +188,12 @@ class PedidoController extends Pedido
           {
             if($pedido->estado == "Listo para servir")
             {
-              
               $mesa = Mesa::obtenerMesaPorId($pedido->idMesa);
-              if ($mesa->estado=="Con cliente esperando el pedido")
+              if ($mesa->estado=="Con clientes esperando el pedido")
               {
                 $pedido->estado = "Servido";
                 Pedido::actualizarPedido($pedido);
+                Producto::actualizarProductosAServidos($id);
 
                 $mesa->estado = "Con clientes comiendo";
                 Mesa::actualizarMesa($mesa);
@@ -200,10 +202,10 @@ class PedidoController extends Pedido
               }
             }
             else
-              $payload = json_encode(array("mensaje" => "Este pedido sigue en preparación..."));
+              $payload = json_encode(array("error" => "Este pedido sigue en preparación o ya fue servido..."));
           }
           else
-            $payload = json_encode(array("mensaje" => "Este pedido no existe..."));
+            $payload = json_encode(array("error" => "Este pedido no existe..."));
         }
 
         $response->getBody()->write($payload);

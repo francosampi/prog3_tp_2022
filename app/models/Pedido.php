@@ -60,9 +60,9 @@ class Pedido
         $consulta = $objAccesoDatos->prepararConsulta("SELECT p.nombreCliente, p.fechaAlta,
                                                        MAX(pr.horaEstimada) horaEstimada
                                                        FROM productos pr
-                                                       JOIN pedidos p
+                                                       LEFT JOIN pedidos p
                                                        ON pr.nroOrden = :nroOrden
-                                                       JOIN mesas m
+                                                       LEFT JOIN mesas m
                                                        ON p.idMesa = m.id
                                                        WHERE m.codigo = :codigoMesa");
 
@@ -76,7 +76,7 @@ class Pedido
     public static function obtenerPedidosConTiempoEstimado()
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("SELECT p.id, p.idMesa, p.idMozo, p.nombreCliente, p.fechaAlta, p.precioTotal, p.pathFoto,
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT p.id, p.idMesa, p.nombreCliente, p.fechaAlta, p.precioTotal, p.pathFoto,
                                                        MAX(pr.horaEstimada) horaEstimada
                                                        FROM productos pr
                                                        JOIN pedidos p
