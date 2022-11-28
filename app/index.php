@@ -20,6 +20,7 @@ require_once './controllers/PedidoController.php';
 require_once './controllers/PlatoController.php';
 require_once './controllers/ProductoController.php';
 require_once './controllers/MesaController.php';
+require_once './controllers/FacturaController.php';
 
 require_once './middlewares/MWAutenticadorPerfiles.php';
 
@@ -59,6 +60,7 @@ $app->group('/pedido', function (RouteCollectorProxy $group){
     $group->post('[/]', \PedidoController::class . ':CargarUno');
     $group->get('/listo', \PedidoController::class . ':TraerTodosListos');
     $group->put('/servir', \PedidoController::class . ':ServirUno');
+    $group->post('/cobrar', \PedidoController::class . ':CobrarUno');
 })->add(new MWAutenticadorMozo());
 
 //RUTAS: pedidos (Socio)
@@ -115,6 +117,7 @@ $app->group('/mesa', function (RouteCollectorProxy $group){
 //RUTAS: Cliente
 $app->group('/cliente', function (RouteCollectorProxy $group){
     $group->get('/{codigoMesa}/{nroOrden}', \PedidoController::class . ':TraerUnoConTiempoEstimado');
+    $group->get('/menu', \PlatoController::class . ':TraerTodosCliente');
 });
 
 //RUTA: Login cuenta

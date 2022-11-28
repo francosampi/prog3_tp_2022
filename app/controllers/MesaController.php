@@ -64,19 +64,19 @@ class MesaController extends Mesa
 
           if($mesa->estado != "Cerrada")
           {
-            if($mesa->estado == "Con cliente pagando")
+            if($mesa->estado == "Con clientes pagando")
             {
-              $mesa->estado="Cerrada";
-              $mesa->idEmpleado=NULL;
+              $mesa->estado = "Cerrada";
+              $mesa->idEmpleado = NULL;
               Mesa::actualizarMesa($mesa);
 
               $payload = json_encode(array("mensaje" => "Mesa cerrada con exito"));
             }
             else
-              $payload = json_encode(array("error" => "La mesa se encuentra en uso..."));
+              $payload = json_encode(array("error" => "La mesa aún está en uso..."));
           }
           else
-            $payload = json_encode(array("error" => "La mesa se encuentra cerrada..."));
+            $payload = json_encode(array("error" => "La mesa ya se encuentra cerrada..."));
         }
 
         $response->getBody()->write($payload);

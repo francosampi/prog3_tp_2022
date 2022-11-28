@@ -67,6 +67,16 @@ class PlatoController extends Plato
           ->withHeader('Content-Type', 'application/json');
     }
 
+    public function TraerTodosCliente($request, $response, $args)
+    {
+        $lista = Plato::obtenerTodosCliente();
+        $payload = json_encode(array("platos" => $lista));
+
+        $response->getBody()->write($payload);
+        return $response
+          ->withHeader('Content-Type', 'application/json');
+    }
+
     public function BorrarUno($request, $response, $args)
     {
         $parametros = $request->getParsedBody();

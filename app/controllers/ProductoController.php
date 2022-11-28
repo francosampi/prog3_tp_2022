@@ -18,31 +18,39 @@ class ProductoController extends Producto
           {
             if($plato->stock>0)
             {
-              $nombre = $plato->nombre;
-              $sector = $plato->sector;
-              $precio = $plato->precio;
               $nroOrden = $parametros['nroOrden'];
-  
-              $producto = new Producto();
-              $producto->nombre = $nombre;
-              $producto->sector = $sector;
-              $producto->precio = $precio;
-              $producto->nroOrden = $nroOrden;
-              $producto->crearProducto();
-              
-              $plato->stock--;
-              Plato::actualizarPlato($plato);
-      
+
               $pedido=Pedido::obtenerPedidoPorId($nroOrden);
     
               if($pedido!=NULL)
               {
-                $nuevoPrecio = Producto::obtenerPrecioTotalPorNroOrden($nroOrden);
-                $pedido->precioTotal=$nuevoPrecio;
-    
-                Pedido::actualizarPedido($pedido);
-    
-                $payload = json_encode(array("mensaje" => "Producto creado con exito", "precioPedido"=> $nuevoPrecio));
+                if($pedido->estado!="Cobrado")
+                {
+                  $nombre = $plato->nombre;
+                  $sector = $plato->sector;
+                  $precio = $plato->precio;
+      
+                  $producto = new Producto();
+                  $producto->nombre = $nombre;
+                  $producto->sector = $sector;
+                  $producto->precio = $precio;
+                  $producto->nroOrden = $nroOrden;
+                  $producto->crearProducto();
+                  
+                  $plato->stock--;
+                  Plato::actualizarPlato($plato);
+
+                  $nuevoPrecio = Producto::obtenerPrecioTotalPorNroOrden($nroOrden);
+                  $pedido->precioTotal=$nuevoPrecio;
+      
+                  Pedido::actualizarPedido($pedido);
+      
+                  $payload = json_encode(array("mensaje" => "El pedido del producto fue creado con exito",
+                                               "producto" => $plato->nombre,
+                                               "precioPedido"=> $nuevoPrecio));
+                }
+                else
+                  $payload = json_encode(array("error" => "Ese pedido ya fue cobrado"));
               }
               else
                 $payload = json_encode(array("error" => "Ese pedido no existe"));
@@ -62,7 +70,11 @@ class ProductoController extends Producto
     public function TraerTodos($request, $response, $args)
     {
         $lista = Producto::obtenerTodos();
-        $payload = json_encode(array("productos" => $lista));
+
+        if($lista!=NULL)
+          $payload = json_encode(array("productos" => $lista));
+        else
+          $payload = json_encode(array("mensaje" => "Productos no encontrados..."));
 
         $response->getBody()->write($payload);
         return $response

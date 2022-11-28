@@ -32,6 +32,16 @@ class Plato
         return $consulta->fetchAll(PDO::FETCH_CLASS, 'Plato');
     }
 
+    public static function obtenerTodosCliente()
+    {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT pl.nombre, pl.precio, pl.sector FROM platos pl
+                                                       WHERE stock>0 ORDER BY pl.sector");
+        $consulta->execute();
+
+        return $consulta->fetchAll(PDO::FETCH_CLASS, 'stdClass');
+    }
+
     public static function obtenerPlato($id)
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();

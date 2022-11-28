@@ -1,5 +1,6 @@
 <?php
 require_once './models/Pedido.php';
+require_once './models/Factura.php';
 
 class PedidoController extends Pedido
 {
@@ -53,7 +54,8 @@ class PedidoController extends Pedido
             $mesa->estado="Con clientes esperando el pedido";
             Mesa::actualizarMesa($mesa);
   
-            $payload = json_encode(array("mensaje" => "Pedido creado con exito",
+            $payload = json_encode(array("mensajePedido" => "Pedido creado con exito",
+                                         "mensajeMesa" => "Mesa actualizada con exito",
                                          "infoImagen" => "La imagen se ha guardado correctamente en ".$fotoDir,
                                          "codigoMesa" => $mesa->codigo));
           }
@@ -115,21 +117,6 @@ class PedidoController extends Pedido
         $nroOrden = $args['nroOrden'];
 
         $pedido = Pedido::obtenerTiempoEstimadoPedido($codigoMesa, $nroOrden);
-
-        /*
-        $horaEstimada = new DateTime($pedido->horaEstimada);
-        $ahora = new DateTime();
-
-        if ($ahora>$pedido->horaEstimada)
-          $tiempoRestante = date_diff($horaEstimada, $ahora);
-        else
-          $payload = json_encode(array("tiempoRestante" => "El pedido está tardando mas de lo esperado"));
-
-        $tiempoRestante->format('%R%a days');
-        $min = $tiempoRestante->days * 24 * 60;
-        $min += $tiempoRestante->h * 60;
-        $min += $tiempoRestante->i;
-        */
 
         if ($pedido!=NULL)
           $payload = json_encode(array("pedido" => $pedido));
@@ -198,11 +185,62 @@ class PedidoController extends Pedido
                 $mesa->estado = "Con clientes comiendo";
                 Mesa::actualizarMesa($mesa);
 
-                $payload = json_encode(array("mensaje" => "Pedido servido con exito"));
+                $payload = json_encode(array("mensajePedido" => "Pedido servido con exito", "mensajeMesa" => "Mesa actualizada con exito"));
               }
             }
             else
               $payload = json_encode(array("error" => "Este pedido sigue en preparación o ya fue servido..."));
+          }
+          else
+            $payload = json_encode(array("error" => "Este pedido no existe..."));
+        }
+
+        $response->getBody()->write($payload);
+        return $response
+          ->withHeader('Content-Type', 'application/json');
+    }
+
+    public function CobrarUno($request, $response, $args)
+    {
+        $parametros = $request->getParsedBody();
+        $payload = json_encode(array("error" => "Faltan datos..."));
+
+        if(isset($parametros['idPedido']))
+        {
+          $id = $parametros['idPedido'];
+          $pedido=Pedido::obtenerPedidoPorId($id);
+
+          if ($pedido!=NULL)
+          {
+            if($pedido->estado == "Servido")
+            {
+              $mesa = Mesa::obtenerMesaPorId($pedido->idMesa);
+
+              if ($mesa->estado=="Con clientes comiendo")
+              {
+                $pedido->estado = "Cobrado";
+                Pedido::actualizarPedido($pedido);
+
+                $mesa->estado = "Con clientes pagando";
+                Mesa::actualizarMesa($mesa);
+
+                //FACTURA
+                $precioTotal = $pedido->precioTotal;
+                $codigoMesa = $mesa->codigo;
+
+                $factura = new Factura();
+                $factura->nroOrden=$id;
+                $factura->codigoMesa=$codigoMesa;
+                $factura->precioTotal=$precioTotal;
+                $factura->crearFactura();
+
+                $payload = json_encode(array("mensajePedido" => "Pedido actualizado con exito",
+                                             "mensajeMesa" => "Mesa actualizada con exito",
+                                             "mensajeFactura" => "Factura cargada con exito"));
+              }
+            }
+            else
+              $payload = json_encode(array("error" => "Este pedido aún no fue servido o ya fue cobrado..."));
           }
           else
             $payload = json_encode(array("error" => "Este pedido no existe..."));
