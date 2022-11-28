@@ -3,6 +3,7 @@
 class Pedido
 {
     public $id;
+    public $nroOrden;
     public $idMesa;
     public $nombreCliente;
     public $fechaAlta;
@@ -12,9 +13,10 @@ class Pedido
     public function crearPedido()
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO pedidos (idMesa, nombreCliente, estado, fechaAlta, pathFoto)
-                                                       VALUES (:idMesa, :nombreCliente, :estado, :fechaAlta, :pathFoto)");
+        $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO pedidos (nroOrden, idMesa, nombreCliente, estado, fechaAlta, pathFoto)
+                                                       VALUES (:nroOrden, :idMesa, :nombreCliente, :estado, :fechaAlta, :pathFoto)");
 
+        $consulta->bindValue(':nroOrden', $this->nroOrden, PDO::PARAM_STR);
         $consulta->bindValue(':idMesa', $this->idMesa, PDO::PARAM_INT);
         $consulta->bindValue(':nombreCliente', $this->nombreCliente, PDO::PARAM_STR);
         $consulta->bindValue(':estado', $this->estado, PDO::PARAM_STR);
@@ -44,6 +46,16 @@ class Pedido
         return $consulta->fetchObject('Pedido');
     }
 
+    public static function obtenerPedidoPorNroOrden($nroOrden)
+    {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT * FROM pedidos WHERE nroOrden = :nroOrden");
+        $consulta->bindValue(':nroOrden', $nroOrden, PDO::PARAM_STR);
+        $consulta->execute();
+
+        return $consulta->fetchObject('Pedido');
+    }
+
     public static function obtenerPedidoPorCodigoMesa($codigoMesa)
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
@@ -57,19 +69,9 @@ class Pedido
     public static function obtenerTiempoEstimadoPedido($codigoMesa, $nroOrden)
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        /*
-        $consulta = $objAccesoDatos->prepararConsulta("SELECT p.nombreCliente, p.fechaAlta,
-                                                       MAX(pr.horaEstimada) horaEstimada
-                                                       FROM productos pr
-                                                       LEFT JOIN pedidos p
-                                                       ON pr.nroOrden = :nroOrden
-                                                       LEFT JOIN mesas m
-                                                       ON p.idMesa = m.id
-                                                       WHERE m.codigo = :codigoMesa");
-                                                       */
         $consulta = $objAccesoDatos->prepararConsulta("SELECT TIMESTAMPDIFF(minute, DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'),
                                                                                     DATE_FORMAT(pr.horaEstimada, '%Y%m%d%H%i%s'))
-                                                                                    AS 'tiempoEstimadoEntregaMinutos'
+                                                                                    AS 'tiempoEstimadoEnMinutos'
                                                                                     FROM productos pr
                                                                                     LEFT JOIN pedidos p
                                                                                     ON pr.nroOrden = :nroOrden
@@ -77,21 +79,32 @@ class Pedido
                                                                                     ON p.idMesa = m.id
                                                                                     WHERE m.codigo = :codigoMesa");
                                                       
-        $consulta->bindValue(':nroOrden', $nroOrden, PDO::PARAM_INT);
+        $consulta->bindValue(':nroOrden', $nroOrden, PDO::PARAM_STR);
         $consulta->bindValue(':codigoMesa', $codigoMesa, PDO::PARAM_STR);
         $consulta->execute();
 
         return $consulta->fetchObject('stdClass');
     }
 
+    /*
+    $consulta = $objAccesoDatos->prepararConsulta("SELECT p.nombreCliente, p.fechaAlta,
+                                                    MAX(pr.horaEstimada) horaEstimada
+                                                    FROM productos pr
+                                                    LEFT JOIN pedidos p
+                                                    ON pr.nroOrden = :nroOrden
+                                                    LEFT JOIN mesas m
+                                                    ON p.idMesa = m.id
+                                                    WHERE m.codigo = :codigoMesa");
+                                                    */
+
     public static function obtenerPedidosConTiempoEstimado()
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("SELECT p.id, p.idMesa, p.nombreCliente, p.fechaAlta, p.precioTotal, p.pathFoto,
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT p.id, p.nroOrden, p.idMesa, p.nombreCliente, p.fechaAlta, p.precioTotal, p.pathFoto,
                                                        MAX(pr.horaEstimada) horaEstimada
                                                        FROM productos pr
                                                        JOIN pedidos p
-                                                       ON pr.nroOrden = p.id
+                                                       ON pr.nroOrden = p.nroOrden
                                                        GROUP BY p.id");
 
         $consulta->execute();

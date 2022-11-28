@@ -21,6 +21,7 @@ require_once './controllers/PlatoController.php';
 require_once './controllers/ProductoController.php';
 require_once './controllers/MesaController.php';
 require_once './controllers/FacturaController.php';
+require_once './controllers/EncuestaController.php';
 
 require_once './middlewares/MWAutenticadorPerfiles.php';
 
@@ -118,6 +119,7 @@ $app->group('/mesa', function (RouteCollectorProxy $group){
 $app->group('/cliente', function (RouteCollectorProxy $group){
     $group->get('/{codigoMesa}/{nroOrden}', \PedidoController::class . ':TraerUnoConTiempoEstimado');
     $group->get('/menu', \PlatoController::class . ':TraerTodosCliente');
+    $group->post('/encuesta/{codigoMesa}/{nroOrden}', \EncuestaController::class . ':CargarUna');
 });
 
 //RUTA: Login cuenta

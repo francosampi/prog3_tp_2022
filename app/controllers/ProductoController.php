@@ -20,7 +20,7 @@ class ProductoController extends Producto
             {
               $nroOrden = $parametros['nroOrden'];
 
-              $pedido=Pedido::obtenerPedidoPorId($nroOrden);
+              $pedido=Pedido::obtenerPedidoPorNroOrden($nroOrden);
     
               if($pedido!=NULL)
               {
@@ -242,7 +242,7 @@ class ProductoController extends Producto
 
               if(count($productosOrden)==count($productosOrdenFinalizados))
               {
-                $pedido=Pedido::obtenerPedidoPorId($nroOrden);
+                $pedido=Pedido::obtenerPedidoPorNroOrden($nroOrden);
                 $pedido->estado = "Listo para servir";
                 Pedido::actualizarPedido($pedido);
               }

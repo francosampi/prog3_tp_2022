@@ -44,6 +44,17 @@ class Encuesta{
         return $consulta->fetchAll(PDO::FETCH_CLASS, 'Mesa');
     }
 
+    public static function obtenerEncuesta($id)
+    {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT * FROM encuestas
+                                                       WHERE id = :id");
+        $consulta->bindValue(':id', $id, PDO::PARAM_INT);
+        $consulta->execute();
+
+        return $consulta->fetchObject('Encuesta');
+    }
+
     public static function obtenerEncuestasPorPuntaje($cantidad){
         $objAccesoDato = AccesoDatos::obtenerInstancia();
         $consulta = $objAccesoDato->prepararConsulta('SELECT * FROM encuestas ORDER BY puntajePromedio DESC LIMIT :cantidad');

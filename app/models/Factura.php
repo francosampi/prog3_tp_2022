@@ -13,7 +13,7 @@ class Factura
         $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO facturas (nroOrden, codigoMesa, precioTotal, fechaAlta)
                                                        VALUES (:nroOrden, :codigoMesa, :precioTotal, :fechaAlta)");
 
-        $consulta->bindValue(':nroOrden', $this->nroOrden, PDO::PARAM_INT);
+        $consulta->bindValue(':nroOrden', $this->nroOrden, PDO::PARAM_STR);
         $consulta->bindValue(':codigoMesa', $this->codigoMesa, PDO::PARAM_STR);
         $consulta->bindValue(':precioTotal', $this->precioTotal, PDO::PARAM_STR);
         $consulta->bindValue(':fechaAlta', date('Y-m-d h:i:s'));

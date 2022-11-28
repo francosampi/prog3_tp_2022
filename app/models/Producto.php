@@ -19,7 +19,7 @@ class Producto
         $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO productos (nroOrden, nombre, sector, precio, estado, horaInicio)
                                                        VALUES (:nroOrden, :nombre, :sector, :precio, :estado, :horaInicio)");
 
-        $consulta->bindValue(':nroOrden', $this->nroOrden, PDO::PARAM_INT);
+        $consulta->bindValue(':nroOrden', $this->nroOrden, PDO::PARAM_STR);
         $consulta->bindValue(':nombre', $this->nombre, PDO::PARAM_STR);
         $consulta->bindValue(':sector', $this->sector, PDO::PARAM_STR);
         $consulta->bindValue(':precio', $this->precio, PDO::PARAM_STR);
@@ -110,7 +110,7 @@ class Producto
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
         $consulta = $objAccesoDatos->prepararConsulta("UPDATE productos SET estado = 'Servido' WHERE nroOrden = :nroOrden");
-        $consulta->bindValue(':nroOrden', $nroOrden, PDO::PARAM_INT);
+        $consulta->bindValue(':nroOrden', $nroOrden, PDO::PARAM_STR);
         $consulta->execute();
 
         return $consulta->fetchAll(PDO::FETCH_CLASS, 'Producto');

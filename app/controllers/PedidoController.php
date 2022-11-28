@@ -32,9 +32,10 @@ class PedidoController extends Pedido
           {
             $pedido = new Pedido();
             $pedido->idMesa = $idMesa;
+            $pedido->nroOrden = substr(str_shuffle("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, 5);
             $pedido->nombreCliente = $nombreCliente;
-            $pedido -> estado = "Pendiente";
-            $pedido -> fechaAlta = date("Y-m-d H:i:s");
+            $pedido->estado = "Pendiente";
+            $pedido->fechaAlta = date("Y-m-d H:i:s");
   
             $foto = $files["img"];
             $fotoCarpeta = './media/pedidos/';
@@ -119,7 +120,12 @@ class PedidoController extends Pedido
         $pedido = Pedido::obtenerTiempoEstimadoPedido($codigoMesa, $nroOrden);
 
         if ($pedido!=NULL)
-          $payload = json_encode(array("pedido" => $pedido));
+        {
+          if($pedido->tiempoEstimadoEnMinutos>0)
+            $payload = json_encode(array("pedido" => $pedido));
+          else
+            $payload = json_encode(array("pedido" => "Su pedido está tardando mas de lo esperado"));
+        }
         else
           $payload = json_encode(array("mensaje" => "Pedidos no encontrados..."));
       }
@@ -166,10 +172,10 @@ class PedidoController extends Pedido
         $parametros = $request->getParsedBody();
         $payload = json_encode(array("error" => "Faltan datos..."));
 
-        if(isset($parametros['id']))
+        if(isset($parametros['nroOrden']))
         {
-          $id = $parametros['id'];
-          $pedido=Pedido::obtenerPedidoPorId($id);
+          $nroOrden = $parametros['nroOrden'];
+          $pedido=Pedido::obtenerPedidoPorNroOrden($nroOrden);
 
           if ($pedido!=NULL)
           {
@@ -180,7 +186,7 @@ class PedidoController extends Pedido
               {
                 $pedido->estado = "Servido";
                 Pedido::actualizarPedido($pedido);
-                Producto::actualizarProductosAServidos($id);
+                Producto::actualizarProductosAServidos($nroOrden);
 
                 $mesa->estado = "Con clientes comiendo";
                 Mesa::actualizarMesa($mesa);
@@ -205,10 +211,10 @@ class PedidoController extends Pedido
         $parametros = $request->getParsedBody();
         $payload = json_encode(array("error" => "Faltan datos..."));
 
-        if(isset($parametros['idPedido']))
+        if(isset($parametros['nroOrden']))
         {
-          $id = $parametros['idPedido'];
-          $pedido=Pedido::obtenerPedidoPorId($id);
+          $nroOrden = $parametros['nroOrden'];
+          $pedido=Pedido::obtenerPedidoPorNroOrden($nroOrden);
 
           if ($pedido!=NULL)
           {
@@ -229,9 +235,9 @@ class PedidoController extends Pedido
                 $codigoMesa = $mesa->codigo;
 
                 $factura = new Factura();
-                $factura->nroOrden=$id;
-                $factura->codigoMesa=$codigoMesa;
-                $factura->precioTotal=$precioTotal;
+                $factura->nroOrden = $nroOrden;
+                $factura->codigoMesa = $codigoMesa;
+                $factura->precioTotal = $precioTotal;
                 $factura->crearFactura();
 
                 $payload = json_encode(array("mensajePedido" => "Pedido actualizado con exito",
