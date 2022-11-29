@@ -1,4 +1,11 @@
 <?php
+
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use PhpOffice\PhpSpreadsheet\Shared\File;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+
 require_once './models/Plato.php';
 
 class PlatoController extends Plato
@@ -91,6 +98,7 @@ class PlatoController extends Plato
           ->withHeader('Content-Type', 'application/json');
     }
 
+    /*
     public function crearCSVConPlatos($request, $response, $args)
     {
       header("Cache-Control: must-revalidate");
@@ -98,15 +106,14 @@ class PlatoController extends Plato
       header('Content-Type: application/vnd.ms-excel');
       header('Content-Disposition: attachment; filename=platos.csv');
 
-      $payload=json_encode(array("error" => "Ocurrio un error al descargar el archivo"));
+      //$payload=json_encode(array("error" => "Ocurrio un error al descargar el archivo"));
 
       try
       {
         //$archivo=$_FILES["archivo"]["tmp_name"];
         //$carga=CSV::cargarTablaConDatosDeCSV($archivo);
         //readfile($archivo);
-        //$response->withHeader('Content-Type', 'text/csv');
-        //fputcsv($out, array('id', 'nroOrden', 'codigoMesa', 'precioTotal', 'fechaAlta'));
+        //$payload=json_encode(array("mensaje" => "El archivo 'platos.csv' fue descargado correctamente"));
 
         $out = fopen('php://output', 'w');
         $platos=Plato::obtenerTodos();
@@ -117,52 +124,89 @@ class PlatoController extends Plato
             $platoRegistro=implode(",", (array)$plato) . PHP_EOL;
             fwrite($out, $platoRegistro);
           }
-          $payload=json_encode(array("mensaje" => "El archivo 'platos.csv' fue descargado correctamente"));
           fclose($out);
         }
         else
-          throw new Exception("Ocurrio un error");
+          throw new Exception("Ocurrio un error cargando el archivo...");
       }
       catch(Exception $e)
       {
           $payload=json_encode(array("error" => $e->getMessage()));
+          $response->getBody()->write($payload);
       }
 
-      $response->getBody()->write($payload);
       return $response->withHeader('Content-Type', 'text/csv');
     }
+    */
     
     public function restaurarPlatosDesdeCSV($request, $response, $args)
     {
+      /*
+      header("Cache-Control: must-revalidate");
+      header('Content-Description: File Transfer');
+      header('Content-Type: application/download');
+      header('Expires: 0');
+      header("Pragma: public");
+      header('Content-Type: application/force-download');
+      header('Content-Type: application/csv');
+      */
+
       $archivo = $_FILES["archivo"]["tmp_name"];
-      $input = fopen($archivo, "r");
-      $payload=json_encode(array("error" => "Faltan datos..."));
-      
-      if($input)
-      {
-          Plato::borrarTodas();
 
-          while(!feof($input))
+      try{
+        $input = fopen($archivo, "r");
+        
+        if($input)
+        {
+            Plato::borrarTodas();
+  
+            while(!feof($input))
+            {
+                $datoplato = fgets($input);
+  
+                if(!empty($datoplato))
+                {         
+                    $plato=new plato();
+  
+                    $arr=explode(",", $datoplato);
+                    $plato->nombre=$arr[1];
+                    $plato->sector=$arr[2];
+                    $plato->precio=$arr[3];
+                    $plato->stock=$arr[4];
+                    $plato->crearplato();
+                }
+            }
+            fclose($input);
+
+          $out = fopen('php://temp', 'w');
+          $platos=Plato::obtenerTodos();
+
+          if($out)
           {
-              $datoplato = fgets($input);
+            foreach ($platos as $plato) {
+              $platoRegistro=implode(",", (array)$plato) . PHP_EOL;
+              fwrite($out, $platoRegistro);
+            }
+            rewind($out);
+            $datosCsv=stream_get_contents($out);
+            fclose($out);
 
-              if(!empty($datoplato))
-              {         
-                  $plato=new plato();
-
-                  $arr=explode(",", $datoplato);
-                  $plato->nombre=$arr[1];
-                  $plato->sector=$arr[2];
-                  $plato->precio=$arr[3];
-                  $plato->stock=$arr[4];
-                  $plato->crearplato();
-              }
+            $response->getBody()->rewind();
+            $response->getBody()->write($datosCsv);
           }
-          fclose($input);
-          $payload=json_encode(array("mensaje" => "Se ha restaurado la base de datos exitosamente"));
+          else
+            throw new Exception("Ocurrio un error cargando el archivo...");
+        }
+        else
+            throw new Exception("Ocurrio un error restaurando la base...");
+      }
+      catch(Exception $e)
+      {
+        $payload=json_encode(array("error" => $e->getMessage()));
+        $response->getBody()->write($payload);
       }
 
-      $response->getBody()->write($payload);
-      return $response->withHeader('Content-Type', 'application/json');
+      return $response->withHeader('Content-Disposition', 'attachment; filename="platos.csv"')
+                      ->withHeader('Content-Type', 'application/force-download');
     }
 }

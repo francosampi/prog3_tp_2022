@@ -29,7 +29,7 @@ class AutentificadorController
                         throw new Exception("Algun dato no es valido...");
                 }
                 else
-                    throw new Exception("Este usuario está invalidado...");
+                    throw new Exception("Este usuario está inactivo...");
             }
             else
                 throw new Exception("Faltan campos por completar...");

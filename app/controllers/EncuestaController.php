@@ -65,10 +65,20 @@ class EncuestaController extends Encuesta
           ->withHeader('Content-Type', 'application/json');
     }
 
-    public function TraerTodos($request, $response, $args)
+    public function TraerTodas($request, $response, $args)
     {
         $lista = Encuesta::obtenerTodos();
-        $payload = json_encode(array("Encuestas" => $lista));
+        $payload = json_encode(array("encuestas" => $lista));
+
+        $response->getBody()->write($payload);
+        return $response
+          ->withHeader('Content-Type', 'application/json');
+    }
+
+    public function TraerTodasPorPuntaje($request, $response, $args)
+    {
+        $lista = Encuesta::obtenerEncuestasPorPuntaje();
+        $payload = json_encode(array("encuestas" => $lista));
 
         $response->getBody()->write($payload);
         return $response

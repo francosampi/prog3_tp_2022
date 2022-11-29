@@ -115,12 +115,18 @@ $app->group('/mesa', function (RouteCollectorProxy $group){
     $group->delete('[/]', \MesaController::class . ':BorrarUna');
 })->add(new MWAutenticadorSocio());
 
-//RUTAS: cliente
+//RUTAS: pedido/menu/encuesta (Cliente)
 $app->group('/cliente', function (RouteCollectorProxy $group){
     $group->get('/{codigoMesa}/{nroOrden}', \PedidoController::class . ':TraerUnoConTiempoEstimado');
     $group->get('/menu', \PlatoController::class . ':TraerTodosCliente');
     $group->post('/encuesta/{codigoMesa}/{nroOrden}', \EncuestaController::class . ':CargarUna');
 });
+
+//RUTA: encuestas (Socio)
+$app->group('/encuesta', function (RouteCollectorProxy $group){
+    $group->get('[/]', \EncuestaController::class . ':TraerTodas');
+    $group->get('/top', \EncuestaController::class . ':TraerTodasPorPuntaje');
+})->add(new MWAutenticadorSocio());
 
 //RUTAS: Archivos (socio)
 $app->group('/archivo', function (RouteCollectorProxy $group){
