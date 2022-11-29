@@ -16,7 +16,7 @@ class Factura
         $consulta->bindValue(':nroOrden', $this->nroOrden, PDO::PARAM_STR);
         $consulta->bindValue(':codigoMesa', $this->codigoMesa, PDO::PARAM_STR);
         $consulta->bindValue(':precioTotal', $this->precioTotal, PDO::PARAM_STR);
-        $consulta->bindValue(':fechaAlta', date('Y-m-d h:i:s'));
+        $consulta->bindValue(':fechaAlta', $this->fechaAlta, PDO::PARAM_STR);
         $consulta->execute();
 
         return $objAccesoDatos->obtenerUltimoId();
@@ -43,10 +43,11 @@ class Factura
         return $consulta->fetchObject('Factura');
     }
 
-    public static function borrarTodasLasFacturas()
+    public static function borrarUna($id)
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("TRUNCATE TABLE facturas");
+        $consulta = $objAccesoDatos->prepararConsulta("DELETE FROM facturas WHERE id=:id");
+        $consulta->bindValue(':id', $id, PDO::PARAM_INT);
         $consulta->execute();
     }
 }

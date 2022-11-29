@@ -73,4 +73,11 @@ class Plato
         $consulta->bindValue(':id', $id, PDO::PARAM_INT);
         $consulta->execute();
     }
+
+    public static function borrarTodas()
+    {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("TRUNCATE TABLE platos");
+        $consulta->execute();
+    }
 }

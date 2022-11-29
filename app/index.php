@@ -22,7 +22,6 @@ require_once './controllers/ProductoController.php';
 require_once './controllers/MesaController.php';
 require_once './controllers/FacturaController.php';
 require_once './controllers/EncuestaController.php';
-require_once './controllers/ArchivoController.php';
 
 require_once './middlewares/MWAutenticadorPerfiles.php';
 
@@ -125,7 +124,8 @@ $app->group('/cliente', function (RouteCollectorProxy $group){
 
 //RUTAS: Archivos (socio)
 $app->group('/archivo', function (RouteCollectorProxy $group){
-    $group->post('/guardar', \ArchivoController::class . ':crearCSVConDatosDeUnaTabla');
+    $group->post('/guardar', \PlatoController::class . ':crearCSVConPlatos');
+    $group->post('/restaurar', \PlatoController::class . ':restaurarPlatosDesdeCSV');
 });
 
 //RUTA: Login cuenta

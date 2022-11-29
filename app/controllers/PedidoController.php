@@ -58,6 +58,7 @@ class PedidoController extends Pedido
             $payload = json_encode(array("mensajePedido" => "Pedido creado con exito",
                                          "mensajeMesa" => "Mesa actualizada con exito",
                                          "infoImagen" => "La imagen se ha guardado correctamente en ".$fotoDir,
+                                         "numeroOrden" => $pedido->nroOrden,
                                          "codigoMesa" => $mesa->codigo));
           }
           else
@@ -238,6 +239,7 @@ class PedidoController extends Pedido
                 $factura->nroOrden = $nroOrden;
                 $factura->codigoMesa = $codigoMesa;
                 $factura->precioTotal = $precioTotal;
+                $factura->fechaAlta = date('Y-m-d h:i:s');
                 $factura->crearFactura();
 
                 $payload = json_encode(array("mensajePedido" => "Pedido actualizado con exito",

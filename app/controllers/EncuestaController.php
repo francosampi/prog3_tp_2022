@@ -44,7 +44,7 @@ class EncuestaController extends Encuesta
               $encuesta->descripcion = $descripcion;
               $encuesta->crearEncuesta();
         
-              $payload = json_encode(array("mensaje" => "Encuesta creado con exito"));
+              $payload = json_encode(array("mensaje" => "Encuesta creado con exito", "cliente" => $encuesta->cliente));
             }
           }
         }

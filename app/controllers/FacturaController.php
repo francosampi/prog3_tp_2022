@@ -31,7 +31,7 @@ class FacturaController extends Factura
         $parametros = $request->getParsedBody();
 
         $id = $parametros['id'];
-        Factura::borrarFactura($id);
+        Factura::borrarUna($id);
 
         $payload = json_encode(array("mensaje" => "Factura borrada con exito"));
 
