@@ -1,6 +1,7 @@
 <?php
 
-class Encuesta{
+class Encuesta
+{
     public $id;
     public $codigoMesa;
     public $cliente;

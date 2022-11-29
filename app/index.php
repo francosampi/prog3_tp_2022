@@ -22,6 +22,7 @@ require_once './controllers/ProductoController.php';
 require_once './controllers/MesaController.php';
 require_once './controllers/FacturaController.php';
 require_once './controllers/EncuestaController.php';
+require_once './controllers/ArchivoController.php';
 
 require_once './middlewares/MWAutenticadorPerfiles.php';
 
@@ -115,11 +116,16 @@ $app->group('/mesa', function (RouteCollectorProxy $group){
     $group->delete('[/]', \MesaController::class . ':BorrarUna');
 })->add(new MWAutenticadorSocio());
 
-//RUTAS: Cliente
+//RUTAS: cliente
 $app->group('/cliente', function (RouteCollectorProxy $group){
     $group->get('/{codigoMesa}/{nroOrden}', \PedidoController::class . ':TraerUnoConTiempoEstimado');
     $group->get('/menu', \PlatoController::class . ':TraerTodosCliente');
     $group->post('/encuesta/{codigoMesa}/{nroOrden}', \EncuestaController::class . ':CargarUna');
+});
+
+//RUTAS: Archivos (socio)
+$app->group('/archivo', function (RouteCollectorProxy $group){
+    $group->post('/guardar', \ArchivoController::class . ':crearCSVDeDatosTabla');
 });
 
 //RUTA: Login cuenta
