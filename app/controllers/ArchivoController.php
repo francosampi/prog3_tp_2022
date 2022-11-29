@@ -14,8 +14,7 @@ class ArchivoController
           if($carga)
           {
             readfile($archivo);
-            $response->withHeader('Content-Type', 'text/csv')
-                     ->withHeader('Content-Disposition: attachment; filename=facturas.csv');
+            $response->withHeader('Content-Type', 'text/csv');
           }
           else
             throw new Exception("Ocurrio un error");
@@ -27,6 +26,18 @@ class ArchivoController
         }
 
         return $response;
+    }
+
+    public function crearCSVConDatosDeUnaTabla($request, $response, $args)
+    {
+      if(Csv::crearCSVDeDatosTabla())
+        $payload=json_encode(array("mensaje" => "El CSV se ha cargado exitosamente"));
+      else
+        $payload=json_encode(array("error" => "Faltan datos..."));
+      
+      $response->getBody()->write($payload);
+   
+      return $response->withHeader('Content-Type', 'application/json');;
     }
 }
 

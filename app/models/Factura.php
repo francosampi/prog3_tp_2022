@@ -42,4 +42,11 @@ class Factura
 
         return $consulta->fetchObject('Factura');
     }
+
+    public static function borrarTodasLasFacturas()
+    {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("TRUNCATE TABLE facturas");
+        $consulta->execute();
+    }
 }

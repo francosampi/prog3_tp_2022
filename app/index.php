@@ -125,7 +125,7 @@ $app->group('/cliente', function (RouteCollectorProxy $group){
 
 //RUTAS: Archivos (socio)
 $app->group('/archivo', function (RouteCollectorProxy $group){
-    $group->post('/guardar', \ArchivoController::class . ':crearCSVDeDatosTabla');
+    $group->post('/guardar', \ArchivoController::class . ':crearCSVConDatosDeUnaTabla');
 });
 
 //RUTA: Login cuenta
